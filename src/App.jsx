@@ -1,89 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-
-const paths = {
-  home: (
-    <>
-      <path d="M3 10.8 12 3l9 7.8" />
-      <path d="M5.5 9.5V21h13V9.5M9.5 21v-6h5v6" />
-    </>
-  ),
-  quiz: (
-    <>
-      <path d="M8.5 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-3.5" />
-      <path d="m7 11 3 3L21 3" />
-    </>
-  ),
-  trophy: (
-    <>
-      <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z" />
-      <path d="M7 6H3v2a4 4 0 0 0 4 4M17 6h4v2a4 4 0 0 1-4 4" />
-    </>
-  ),
-  settings: (
-    <>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.94 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.58 15 1.7 1.7 0 0 0 3 14H3v-4h.08A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.88L4.2 7l2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.58 1.7 1.7 0 0 0 10 3h4v.08A1.7 1.7 0 0 0 15.06 4.6a1.7 1.7 0 0 0 1.88-.34L17 4.2l2.83 2.83-.06.06A1.7 1.7 0 0 0 19.42 9 1.7 1.7 0 0 0 21 10v4h-.08A1.7 1.7 0 0 0 19.4 15Z" />
-    </>
-  ),
-  sun: (
-    <>
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41" />
-    </>
-  ),
-  moon: <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" />,
-  bell: (
-    <>
-      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
-    </>
-  ),
-  search: (
-    <>
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-4-4" />
-    </>
-  ),
-  clock: (
-    <>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5l3 2" />
-    </>
-  ),
-  users: (
-    <>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-    </>
-  ),
-  bolt: <path d="m13 2-9 12h7l-1 8 9-12h-7l1-8Z" />,
-  arrow: (
-    <>
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </>
-  ),
-  star: (
-    <path d="m12 2.5 2.9 5.88 6.5.95-4.7 4.58 1.11 6.47L12 17.33l-5.81 3.05 1.11-6.47-4.7-4.58 6.5-.95L12 2.5Z" />
-  ),
-};
-
-function Icon({ name, size = 20, filled = false }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {paths[name]}
-    </svg>
-  );
-}
+import { Icon } from "./Icon";
+import DailyGoal from "./DailyGoal";
+import QuizPage from "./QuizPage";
 
 function MenuBars() {
   return (
@@ -185,12 +103,31 @@ export default function App() {
     () => localStorage.getItem("quiz-sidebar") !== "closed",
   );
   const [category, setCategory] = useState("Science");
+  const [quickStart, setQuickStart] = useState(false);
+  const [quizzesDone, setQuizzesDone] = useState(3);
+  const [points, setPoints] = useState(6480);
+  const dailyGoal = 5;
   const [notifOpen, setNotifOpen] = useState(false);
   const [showDot, setShowDot] = useState(true);
   const [notifications, setNotifications] = useState(initialNotifications);
   const notifRef = useRef(null);
   const readTimer = useRef(null);
   const newCount = notifications.filter((n) => n.unread).length;
+
+  function goTo(tab) {
+    setQuickStart(false);
+    setActive(tab);
+  }
+
+  function startQuickPlay() {
+    setQuickStart(true);
+    setActive("Quiz");
+  }
+
+  function completeQuiz({ points: earned }) {
+    setQuizzesDone((n) => n + 1);
+    setPoints((p) => p + earned);
+  }
 
   function openNotifications() {
     clearTimeout(readTimer.current);
@@ -209,6 +146,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("quiz-theme", dark ? "dark" : "light");
   }, [dark]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [active]);
 
   useEffect(() => {
     localStorage.setItem("quiz-sidebar", sidebarOpen ? "open" : "closed");
@@ -256,7 +197,8 @@ export default function App() {
             <button
               key={item.label}
               className={active === item.label ? "nav-item active" : "nav-item"}
-              onClick={() => setActive(item.label)}
+              onClick={() => goTo(item.label)}
+              aria-current={active === item.label ? "page" : undefined}
             >
               <Icon name={item.icon} size={19} />
               <span>{item.label}</span>
@@ -359,6 +301,17 @@ export default function App() {
           </div>
         </header>
 
+        {active === "Quiz" ? (
+          <QuizPage
+            categories={categories}
+            category={category}
+            setCategory={setCategory}
+            quickStart={quickStart}
+            done={quizzesDone}
+            goal={dailyGoal}
+            onComplete={completeQuiz}
+          />
+        ) : (
         <div className="content">
           <section className="welcome">
             <div>
@@ -366,16 +319,7 @@ export default function App() {
               <h1>Ready to play, Jamie?</h1>
               <p className="subtitle">Choose a game mode and put your knowledge to the test.</p>
             </div>
-            <div className="daily-goal">
-              <div className="goal-ring">
-                <span>3</span>
-                <small>/5</small>
-              </div>
-              <div>
-                <strong>Daily goal</strong>
-                <p>2 quizzes to go!</p>
-              </div>
-            </div>
+            <DailyGoal done={quizzesDone} goal={dailyGoal} />
           </section>
 
           <section>
@@ -393,7 +337,7 @@ export default function App() {
                 <button
                   key={mode.title}
                   className={`mode-card ${mode.color}`}
-                  onClick={() => index === 0 && setActive("Quiz")}
+                  onClick={() => index === 0 && startQuickPlay()}
                 >
                   <span className="mode-icon">
                     <Icon name={mode.icon} size={25} filled={mode.icon === "star"} />
@@ -490,16 +434,17 @@ export default function App() {
                 <span className="avatar avatar-j">JD</span>
                 <span className="leader-name">
                   <strong>You</strong>
-                  <small>6,480 pts</small>
+                  <small>{points.toLocaleString("en-US")} pts</small>
                 </span>
                 <span className="rank-up">↑ 2</span>
               </div>
-              <button className="leader-button" onClick={() => setActive("Leaderboard")}>
+              <button className="leader-button" onClick={() => goTo("Leaderboard")}>
                 Full leaderboard <Icon name="arrow" size={16} />
               </button>
             </aside>
           </div>
         </div>
+        )}
       </main>
 
       <nav className="bottom-nav" aria-label="Mobile navigation">
@@ -507,7 +452,8 @@ export default function App() {
           <button
             key={item.label}
             className={active === item.label ? "active" : ""}
-            onClick={() => setActive(item.label)}
+            onClick={() => goTo(item.label)}
+            aria-current={active === item.label ? "page" : undefined}
           >
             <Icon name={item.icon} size={20} />
             <span>{item.label}</span>
