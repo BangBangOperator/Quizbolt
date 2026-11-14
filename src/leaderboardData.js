@@ -61,7 +61,7 @@ function sortRows(rows) {
  * Build the ranked board for a period/scope with the user's live points.
  * Returns { rows, me, next, gap } where `next` is the player directly above the user.
  */
-export function buildBoard(periodId, points, scope = "everyone", quizzesDone = 3) {
+export function buildBoard(periodId, points, scope = "everyone", quizzesDone = 3, initials = me.initials) {
   const period = PERIODS.find((p) => p.id === periodId) ?? PERIODS[0];
   const pool = players.filter((p) => scope === "everyone" || p.friend);
 
@@ -78,6 +78,7 @@ export function buildBoard(periodId, points, scope = "everyone", quizzesDone = 3
     ...others,
     {
       ...me,
+      initials,
       score: points + period.offset,
       quizzes: Math.round((11 + quizzesDone) * period.quizMul),
     },

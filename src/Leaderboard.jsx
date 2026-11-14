@@ -56,13 +56,13 @@ function PodiumCard({ player }) {
   );
 }
 
-export default function Leaderboard({ points, quizzesDone, onPlay }) {
+export default function Leaderboard({ points, quizzesDone, initials, onPlay }) {
   const [period, setPeriod] = useState("week");
   const [scope, setScope] = useState("everyone");
 
   const board = useMemo(
-    () => buildBoard(period, points, scope, quizzesDone),
-    [period, scope, points, quizzesDone],
+    () => buildBoard(period, points, scope, quizzesDone, initials),
+    [period, scope, points, quizzesDone, initials],
   );
   const { rows, me, next, behind } = board;
   const podium = rows.slice(0, 3);

@@ -3,7 +3,8 @@ import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import QuizPage from "./QuizPage";
 import Leaderboard from "./Leaderboard";
-import { buildBoard, fmt } from "./leaderboardData";
+import Settings from "./Settings";
+import { START_POINTS, buildBoard, fmt } from "./leaderboardData";
 
 function MenuBars() {
   return (
@@ -57,6 +58,7 @@ const initialNotifications = [
   {
     id: 1,
     emoji: "🏆",
+    type: "notifRank",
     color: "yellow",
     title: "You moved up 2 ranks",
     text: "You're now #8 on this week's leaderboard.",
@@ -66,6 +68,7 @@ const initialNotifications = [
   {
     id: 2,
     emoji: "🔥",
+    type: "notifStreak",
     color: "peach",
     title: "7 day streak!",
     text: "Play one quiz today to keep it going.",
@@ -75,6 +78,7 @@ const initialNotifications = [
   {
     id: 3,
     emoji: "🪐",
+    type: "notifProgress",
     color: "blue",
     title: "Continue Wonders of Space",
     text: "4 questions left to finish your quiz.",
@@ -84,6 +88,7 @@ const initialNotifications = [
   {
     id: 4,
     emoji: "👋",
+    type: "notifInvites",
     color: "pink",
     title: "Noah Kim invited you",
     text: "Join his room and play together.",
@@ -91,6 +96,33 @@ const initialNotifications = [
     unread: false,
   },
 ];
+
+const DEFAULT_PREFS = {
+  questionTime: 20,
+  reduceMotion: false,
+  notifRank: true,
+  notifStreak: true,
+  notifProgress: true,
+  notifInvites: true,
+};
+const DEFAULT_NAME = "Jamie Doe";
+
+function loadPrefs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("quiz-prefs"));
+    const merged = { ...DEFAULT_PREFS, ...saved };
+    if (![15, 20, 30].includes(merged.questionTime)) merged.questionTime = DEFAULT_PREFS.questionTime;
+    return merged;
+  } catch {
+    return DEFAULT_PREFS;
+  }
+}
+
+function initialsOf(name) {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const letters = words.length > 1 ? words[0][0] + words[words.length - 1][0] : (words[0] ?? "?").slice(0, 2);
+  return letters.toUpperCase();
+}
 
 export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem("quiz-theme") === "dark");
@@ -101,15 +133,20 @@ export default function App() {
   const [category, setCategory] = useState("Science");
   const [quickStart, setQuickStart] = useState(false);
   const [quizzesDone, setQuizzesDone] = useState(3);
-  const [points, setPoints] = useState(6480);
+  const [points, setPoints] = useState(START_POINTS);
+  const [name, setName] = useState(() => localStorage.getItem("quiz-name") || DEFAULT_NAME);
+  const [prefs, setPrefs] = useState(loadPrefs);
+  const initials = initialsOf(name);
+  const firstName = name.trim().split(/\s+/)[0];
   const dailyGoal = 5;
   const [notifOpen, setNotifOpen] = useState(false);
   const [showDot, setShowDot] = useState(true);
   const [notifications, setNotifications] = useState(initialNotifications);
   const notifRef = useRef(null);
   const readTimer = useRef(null);
-  const newCount = notifications.filter((n) => n.unread).length;
-  const weekly = buildBoard("week", points, "everyone", quizzesDone);
+  const visibleNotifications = notifications.filter((n) => prefs[n.type]);
+  const newCount = visibleNotifications.filter((n) => n.unread).length;
+  const weekly = buildBoard("week", points, "everyone", quizzesDone, initials);
   const leaders = weekly.rows.slice(0, 3);
 
   function goTo(tab) {
@@ -125,6 +162,21 @@ export default function App() {
   function completeQuiz({ points: earned }) {
     setQuizzesDone((n) => n + 1);
     setPoints((p) => p + earned);
+  }
+
+  function setPref(key, value) {
+    setPrefs((p) => ({ ...p, [key]: value }));
+  }
+
+  function resetPrefs() {
+    setPrefs(DEFAULT_PREFS);
+    setDark(false);
+    setSidebarOpen(true);
+  }
+
+  function resetProgress() {
+    setPoints(START_POINTS);
+    setQuizzesDone(3);
   }
 
   function openNotifications() {
@@ -150,6 +202,14 @@ export default function App() {
   }, [active]);
 
   useEffect(() => {
+    localStorage.setItem("quiz-prefs", JSON.stringify(prefs));
+  }, [prefs]);
+
+  useEffect(() => {
+    localStorage.setItem("quiz-name", name);
+  }, [name]);
+
+  useEffect(() => {
     localStorage.setItem("quiz-sidebar", sidebarOpen ? "open" : "closed");
   }, [sidebarOpen]);
 
@@ -170,7 +230,7 @@ export default function App() {
   }, [notifOpen]);
 
   return (
-    <div className={`app${dark ? " dark" : ""}${sidebarOpen ? "" : " sidebar-collapsed"}`}>
+    <div className={`app${dark ? " dark" : ""}${sidebarOpen ? "" : " sidebar-collapsed"}${prefs.reduceMotion ? " reduce-motion" : ""}`}>
       <aside className="sidebar" id="app-sidebar" inert={!sidebarOpen}>
         <div className="sidebar-head">
           <div className="brand">
@@ -211,10 +271,10 @@ export default function App() {
           </div>
         </div>
         <div className="sidebar-footer">
-          <button className="profile-mini">
-            <span className="avatar avatar-j">JD</span>
+          <button className="profile-mini" onClick={() => goTo("Settings")} aria-label="Open profile settings">
+            <span className="avatar avatar-j">{initials}</span>
             <span>
-              <strong>Jamie Doe</strong>
+              <strong>{name}</strong>
               <small>Level 12</small>
             </span>
             <span className="more">•••</span>
@@ -265,7 +325,7 @@ export default function App() {
                 onClick={() => (notifOpen ? closeNotifications() : openNotifications())}
               >
                 <Icon name="bell" size={19} />
-                <i className={showDot ? "" : "gone"} />
+                <i className={showDot && newCount > 0 ? "" : "gone"} />
               </button>
               <div
                 className={notifOpen ? "notif-panel open" : "notif-panel"}
@@ -278,7 +338,10 @@ export default function App() {
                   {newCount > 0 && <span className="notif-new">{newCount} new</span>}
                 </div>
                 <ul className="notif-list">
-                  {notifications.map((n, i) => (
+                  {visibleNotifications.length === 0 && (
+                    <li className="notif-empty">You're all caught up. Nothing new here.</li>
+                  )}
+                  {visibleNotifications.map((n, i) => (
                     <li
                       key={n.id}
                       className={n.unread ? "notif-item unread" : "notif-item"}
@@ -295,7 +358,7 @@ export default function App() {
                 </ul>
               </div>
             </div>
-            <span className="avatar avatar-j mobile-avatar">JD</span>
+            <span className="avatar avatar-j mobile-avatar">{initials}</span>
           </div>
         </header>
 
@@ -307,16 +370,31 @@ export default function App() {
             quickStart={quickStart}
             done={quizzesDone}
             goal={dailyGoal}
+            questionTime={prefs.questionTime}
             onComplete={completeQuiz}
           />
         ) : active === "Leaderboard" ? (
-          <Leaderboard points={points} quizzesDone={quizzesDone} onPlay={() => goTo("Quiz")} />
+          <Leaderboard points={points} quizzesDone={quizzesDone} initials={initials} onPlay={() => goTo("Quiz")} />
+        ) : active === "Settings" ? (
+          <Settings
+            name={name}
+            initials={initials}
+            onSaveName={setName}
+            dark={dark}
+            setDark={setDark}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            prefs={prefs}
+            setPref={setPref}
+            onResetPrefs={resetPrefs}
+            onResetProgress={resetProgress}
+          />
         ) : (
         <div className="content">
           <section className="welcome">
             <div>
               <p className="eyebrow">MONDAY, 28 OCTOBER</p>
-              <h1>Ready to play, Jamie?</h1>
+              <h1>Ready to play, {firstName}?</h1>
               <p className="subtitle">Choose a game mode and put your knowledge to the test.</p>
             </div>
             <DailyGoal done={quizzesDone} goal={dailyGoal} />
@@ -434,7 +512,7 @@ export default function App() {
               </div>
               <div className="your-rank">
                 <span className="rank">{weekly.me.rank}</span>
-                <span className="avatar avatar-j">JD</span>
+                <span className="avatar avatar-j">{initials}</span>
                 <span className="leader-name">
                   <strong>You</strong>
                   <small>{fmt(points)} pts</small>

@@ -3,17 +3,16 @@ import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import { bank, createSession, QUICK_PLAY_COUNT } from "./questions";
 
-const QUESTION_TIME = 20; // seconds per question
 const LETTERS = ["A", "B", "C", "D"];
 
-const rules = [
-  { icon: "clock", title: "20 seconds per question", text: "Run out of time and it counts as a miss." },
+const makeRules = (time) => [
+  { icon: "clock", title: `${time} seconds per question`, text: "Run out of time and it counts as a miss." },
   { icon: "check", title: "100 points per right answer", text: "Wrong answers score zero." },
   { icon: "bolt", title: "Up to +100 speed bonus", text: "The faster you answer, the more you earn." },
   { icon: "star", title: "Finish to hit your goal", text: "Counts toward your daily goal." },
 ];
 
-export default function QuizPage({ categories, category, setCategory, quickStart, done, goal, onComplete }) {
+export default function QuizPage({ categories, category, setCategory, quickStart, done, goal, questionTime = 20, onComplete }) {
   const [phase, setPhase] = useState(() =>
     quickStart
       ? { view: "play", config: { kind: "quick" }, session: createSession({ kind: "quick" }) }
@@ -42,6 +41,7 @@ export default function QuizPage({ categories, category, setCategory, quickStart
         key={phase.session.id}
         session={phase.session}
         categories={categories}
+        questionTime={questionTime}
         onFinish={finish}
         onQuit={() => setPhase({ view: "lobby" })}
       />
@@ -62,6 +62,7 @@ export default function QuizPage({ categories, category, setCategory, quickStart
 
   return (
     <Lobby
+      questionTime={questionTime}
       categories={categories}
       category={category}
       setCategory={setCategory}
@@ -74,7 +75,7 @@ export default function QuizPage({ categories, category, setCategory, quickStart
 
 /* ---------------------------------------------------------------- Lobby */
 
-function Lobby({ categories, category, setCategory, done, goal, onStart }) {
+function Lobby({ categories, category, setCategory, done, goal, questionTime, onStart }) {
   const selected = categories.find((c) => c.name === category) ?? categories[0];
   const count = bank[selected.name].length;
 
@@ -104,7 +105,7 @@ function Lobby({ categories, category, setCategory, done, goal, onStart }) {
             <span className="tag">Popular</span>
             <span className="mode-copy">
               <strong>Quick Play</strong>
-              <small>{QUICK_PLAY_COUNT} mixed questions · 5 min</small>
+              <small>{QUICK_PLAY_COUNT} mixed questions · {Math.max(1, Math.round((QUICK_PLAY_COUNT * questionTime) / 60))} min</small>
             </span>
             <span className="mode-arrow">
               <Icon name="arrow" size={18} />
@@ -141,7 +142,7 @@ function Lobby({ categories, category, setCategory, done, goal, onStart }) {
             <div className="continue-info">
               <strong>{selected.name} quiz</strong>
               <span className="start-meta">
-                {count} questions · about {Math.round((count * QUESTION_TIME) / 60)} min
+                {count} questions · about {Math.round((count * questionTime) / 60)} min
               </span>
             </div>
             <button className="primary-btn" onClick={() => onStart({ kind: "category", category: selected.name })}>
@@ -161,7 +162,7 @@ function Lobby({ categories, category, setCategory, done, goal, onStart }) {
             </span>
           </div>
           <div className="rule-list">
-            {rules.map((rule) => (
+            {makeRules(questionTime).map((rule) => (
               <div className="rule-row" key={rule.title}>
                 <span className="rule-icon">
                   <Icon name={rule.icon} size={19} filled={rule.icon === "star"} />
@@ -181,11 +182,11 @@ function Lobby({ categories, category, setCategory, done, goal, onStart }) {
 
 /* ----------------------------------------------------------------- Play */
 
-function Play({ session, categories, onFinish, onQuit }) {
+function Play({ session, categories, questionTime, onFinish, onQuit }) {
   const { questions } = session;
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState(null); // null = still open, -1 = ran out of time
-  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
+  const [timeLeft, setTimeLeft] = useState(questionTime);
   const [log, setLog] = useState([]);
   const stageRef = useRef(null);
   const nextRef = useRef(null);
@@ -211,8 +212,8 @@ function Play({ session, categories, onFinish, onQuit }) {
       {
         picked: i,
         correct,
-        earned: correct ? 100 + timeLeft * 5 : 0,
-        spent: QUESTION_TIME - timeLeft,
+        earned: correct ? 100 + Math.round((timeLeft / questionTime) * 100) : 0,
+        spent: questionTime - timeLeft,
       },
     ];
     setLog(logRef.current);
@@ -230,7 +231,7 @@ function Play({ session, categories, onFinish, onQuit }) {
     answeredRef.current = false;
     setIndex(index + 1);
     setPicked(null);
-    setTimeLeft(QUESTION_TIME);
+    setTimeLeft(questionTime);
   }
 
   // countdown: one tick per second while the question is open

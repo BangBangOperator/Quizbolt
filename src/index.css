@@ -2305,3 +2305,351 @@ main {
     transition: none !important;
   }
 }
+
+/* ================================================================
+   Settings page
+   ================================================================ */
+.notif-empty {
+  padding: 26px 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.set-hero {
+  color: var(--purple);
+  background: var(--soft-purple);
+  box-shadow: 0 10px 22px #7667e826;
+}
+.set-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.set-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.set-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px 20px 8px;
+  box-shadow: 0 10px 35px #3a335208;
+}
+.set-card h2 {
+  margin: 3px 0 0;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.set-body {
+  margin-top: 8px;
+}
+
+/* profile */
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  margin: 6px 0 16px;
+  border-radius: 16px;
+  background: var(--soft-purple);
+}
+.profile-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  font-size: 18px;
+  background: #cfc9ff;
+  box-shadow: 0 0 0 4px #ffffff66;
+}
+.profile-hero-copy {
+  min-width: 0;
+}
+.profile-hero-copy strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-hero-copy small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+.field {
+  padding-bottom: 14px;
+}
+.field label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+.field-row {
+  display: flex;
+  gap: 10px;
+}
+.field input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 15px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 700;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.field input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px #7667e826;
+}
+.field input[aria-invalid="true"] {
+  border-color: #e0687f;
+  box-shadow: 0 0 0 3px #e0687f22;
+}
+.field-hint {
+  margin: 8px 2px 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.field-hint.error {
+  color: #e0687f;
+}
+.primary-btn:disabled {
+  background: color-mix(in srgb, var(--muted) 35%, var(--panel));
+  color: color-mix(in srgb, var(--panel) 70%, #fff);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* setting rows */
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 74px;
+  border-bottom: 1px solid var(--line);
+}
+.set-body > .set-row:last-of-type {
+  border-bottom: 0;
+}
+.set-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #373345;
+}
+.set-icon.yellow {
+  background: #fff1bd;
+  color: #c98a1a;
+}
+.set-icon.pink {
+  background: #ffdce7;
+  color: #db6f94;
+}
+.set-icon.blue {
+  background: #d9ecff;
+  color: #4e8fc8;
+}
+.set-icon.mint {
+  background: #daf4e9;
+  color: #3f9b78;
+}
+.set-icon.peach {
+  background: #ffe7d4;
+  color: #d9823f;
+}
+.set-icon.rose {
+  background: #ffe0e4;
+  color: #d9526a;
+}
+.dark .set-icon.yellow {
+  background: #403722;
+}
+.dark .set-icon.pink {
+  background: #47303a;
+}
+.dark .set-icon.blue {
+  background: #28384c;
+}
+.dark .set-icon.mint {
+  background: #2a3d37;
+}
+.dark .set-icon.peach {
+  background: #43342b;
+}
+.dark .set-icon.rose {
+  background: #46303a;
+}
+.set-copy {
+  flex: 1;
+  min-width: 0;
+}
+.set-copy strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 900;
+}
+.set-copy small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.set-control {
+  flex: 0 0 auto;
+}
+
+/* switch */
+.switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border: 0;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--muted) 35%, var(--panel));
+  transition: background 0.25s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px #2d2b3f33;
+  transition: transform 0.25s cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+.switch[aria-checked="true"] {
+  background: var(--purple);
+}
+.switch[aria-checked="true"]::after {
+  transform: translateX(20px);
+}
+.switch:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+/* buttons + reset area */
+.secondary-btn.small,
+.primary-btn.small {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+.secondary-btn.danger {
+  color: #d9526a;
+}
+.secondary-btn.danger:hover {
+  border-color: #f0a4b1;
+}
+.primary-btn.danger-fill {
+  background: #e0687f;
+}
+.primary-btn.danger-fill:hover {
+  background: #d4546c;
+  box-shadow: 0 8px 18px #e0687f3d;
+}
+.confirm-box {
+  margin: 2px 0 12px;
+  padding: 14px;
+  border-radius: 15px;
+  background: #ffe0e4;
+  color: #5a2a35;
+  animation: quiz-in 0.3s cubic-bezier(0.22, 0.8, 0.24, 1) both;
+}
+.dark .confirm-box {
+  background: #46303a;
+  color: #f8dbe1;
+}
+.confirm-box p {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.set-status {
+  min-height: 30px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #47ad82;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 1000px) {
+  .set-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .desk-only {
+    display: none;
+  }
+  .set-card {
+    padding: 18px 16px 6px;
+  }
+  .set-row {
+    gap: 12px;
+  }
+  .set-icon {
+    width: 38px;
+    height: 38px;
+  }
+  .field-row .primary-btn {
+    padding: 0 16px;
+  }
+  .confirm-actions .secondary-btn,
+  .confirm-actions .primary-btn {
+    flex: 1;
+  }
+}
+
+/* "Reduce motion" preference (in addition to the OS-level setting) */
+.app.reduce-motion *,
+.app.reduce-motion *::before,
+.app.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0s !important;
+}
