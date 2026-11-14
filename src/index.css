@@ -695,6 +695,47 @@ main {
   display: none;
 }
 
+@media (min-width: 1001px) {
+  main {
+    display: flex;
+    flex-direction: column;
+  }
+  .content {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 42px 4.5% 56px;
+  }
+  .lower-grid {
+    flex: 1;
+    align-items: stretch;
+    max-height: 440px;
+  }
+  .topic-section {
+    display: flex;
+    flex-direction: column;
+  }
+  .category-grid {
+    flex: 1;
+  }
+  .category-card {
+    justify-content: center;
+  }
+  .leaderboard-card {
+    display: flex;
+    flex-direction: column;
+  }
+  .leader-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .leader-row {
+    flex: 1;
+  }
+}
+
 @media (max-width: 1000px) {
   .sidebar {
     width: 205px;
