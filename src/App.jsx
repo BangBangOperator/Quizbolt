@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const paths = {
   home: (
@@ -129,14 +129,89 @@ const leaders = [
   { rank: 3, name: "Luca Ray", points: "8,970", initials: "LR", color: "#bdddf8" },
 ];
 
+const initialNotifications = [
+  {
+    id: 1,
+    emoji: "🏆",
+    color: "yellow",
+    title: "You moved up 2 ranks",
+    text: "You're now #8 on this week's leaderboard.",
+    time: "2 min ago",
+    unread: true,
+  },
+  {
+    id: 2,
+    emoji: "🔥",
+    color: "peach",
+    title: "7 day streak!",
+    text: "Play one quiz today to keep it going.",
+    time: "1 hour ago",
+    unread: true,
+  },
+  {
+    id: 3,
+    emoji: "🪐",
+    color: "blue",
+    title: "Continue Wonders of Space",
+    text: "4 questions left to finish your quiz.",
+    time: "3 hours ago",
+    unread: true,
+  },
+  {
+    id: 4,
+    emoji: "👋",
+    color: "pink",
+    title: "Noah Kim invited you",
+    text: "Join his room and play together.",
+    time: "Yesterday",
+    unread: false,
+  },
+];
+
 export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem("quiz-theme") === "dark");
   const [active, setActive] = useState("Home");
   const [category, setCategory] = useState("Science");
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [showDot, setShowDot] = useState(true);
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const notifRef = useRef(null);
+  const readTimer = useRef(null);
+  const newCount = notifications.filter((n) => n.unread).length;
+
+  function openNotifications() {
+    clearTimeout(readTimer.current);
+    setNotifOpen(true);
+    setShowDot(false);
+  }
+
+  function closeNotifications() {
+    setNotifOpen(false);
+    // mark everything as read once the panel has finished closing
+    readTimer.current = setTimeout(() => {
+      setNotifications((list) => list.map((n) => ({ ...n, unread: false })));
+    }, 300);
+  }
 
   useEffect(() => {
     localStorage.setItem("quiz-theme", dark ? "dark" : "light");
   }, [dark]);
+
+  useEffect(() => {
+    if (!notifOpen) return;
+    const onPointerDown = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) closeNotifications();
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") closeNotifications();
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [notifOpen]);
 
   return (
     <div className={dark ? "app dark" : "app"}>
@@ -204,10 +279,45 @@ export default function App() {
             >
               <Icon name={dark ? "sun" : "moon"} size={19} />
             </button>
-            <button className="round-btn notification" aria-label="Notifications">
-              <Icon name="bell" size={19} />
-              <i />
-            </button>
+            <div className="notif-wrap" ref={notifRef}>
+              <button
+                className="round-btn notification"
+                aria-label="Notifications"
+                aria-haspopup="true"
+                aria-expanded={notifOpen}
+                onClick={() => (notifOpen ? closeNotifications() : openNotifications())}
+              >
+                <Icon name="bell" size={19} />
+                <i className={showDot ? "" : "gone"} />
+              </button>
+              <div
+                className={notifOpen ? "notif-panel open" : "notif-panel"}
+                role="region"
+                aria-label="Notifications"
+                aria-hidden={!notifOpen}
+              >
+                <div className="notif-head">
+                  <strong>Notifications</strong>
+                  {newCount > 0 && <span className="notif-new">{newCount} new</span>}
+                </div>
+                <ul className="notif-list">
+                  {notifications.map((n, i) => (
+                    <li
+                      key={n.id}
+                      className={n.unread ? "notif-item unread" : "notif-item"}
+                      style={{ "--i": i }}
+                    >
+                      <span className={`notif-icon ${n.color}`}>{n.emoji}</span>
+                      <div className="notif-copy">
+                        <strong>{n.title}</strong>
+                        <p>{n.text}</p>
+                        <small>{n.time}</small>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
             <span className="avatar avatar-j mobile-avatar">JD</span>
           </div>
         </header>
