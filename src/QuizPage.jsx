@@ -189,6 +189,12 @@ function Play({ session, categories, onFinish, onQuit }) {
   const [log, setLog] = useState([]);
   const stageRef = useRef(null);
   const nextRef = useRef(null);
+  // Synchronous guards. React state only updates on the next render, so two events that
+  // land before it (a click + a key press, the timer + a click) could both pass a
+  // `picked !== null` check and record the same question twice. Refs update instantly.
+  const answeredRef = useRef(false); // has the current question been answered?
+  const finishedRef = useRef(false); // has the round already been handed to onFinish?
+  const logRef = useRef([]); // one entry per answered question, always in sync
 
   const q = questions[index];
   const meta = categories.find((c) => c.name === q.category);
@@ -197,26 +203,31 @@ function Play({ session, categories, onFinish, onQuit }) {
   const last = log[log.length - 1];
 
   function choose(i) {
-    if (picked !== null) return;
+    if (answeredRef.current) return;
+    answeredRef.current = true;
     const correct = i === q.answer;
-    setPicked(i);
-    setLog((entries) => [
-      ...entries,
+    logRef.current = [
+      ...logRef.current,
       {
         picked: i,
         correct,
         earned: correct ? 100 + timeLeft * 5 : 0,
         spent: QUESTION_TIME - timeLeft,
       },
-    ]);
+    ];
+    setLog(logRef.current);
+    setPicked(i);
   }
 
   function next() {
-    if (!answered) return;
+    if (!answeredRef.current) return;
     if (isLast) {
-      onFinish(log);
+      if (finishedRef.current) return;
+      finishedRef.current = true;
+      onFinish(logRef.current.slice(0, questions.length));
       return;
     }
+    answeredRef.current = false;
     setIndex(index + 1);
     setPicked(null);
     setTimeLeft(QUESTION_TIME);
