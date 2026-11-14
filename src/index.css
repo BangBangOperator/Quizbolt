@@ -217,16 +217,16 @@ main {
   display: none;
 }
 .search {
-  width: min(340px, 40vw);
-  height: 40px;
+  width: min(460px, 45vw);
+  height: 48px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: var(--muted);
   background: var(--bg);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 0 12px;
+  border-radius: 14px;
+  padding: 0 16px;
 }
 .search input {
   min-width: 0;
@@ -235,15 +235,7 @@ main {
   outline: none;
   background: transparent;
   color: var(--text);
-  font-size: 12px;
-}
-.search kbd {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  box-shadow: 0 1px 1px #0000000b;
-  border-radius: 5px;
-  padding: 2px 6px;
-  font-size: 9px;
+  font-size: 15px;
 }
 .header-actions {
   display: flex;

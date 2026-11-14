@@ -267,9 +267,8 @@ export default function App() {
             </span>
           </div>
           <label className="search">
-            <Icon name="search" size={18} />
+            <Icon name="search" size={20} />
             <input aria-label="Search quizzes" placeholder="Search quizzes..." />
-            <kbd>⌘ K</kbd>
           </label>
           <div className="header-actions">
             <button
