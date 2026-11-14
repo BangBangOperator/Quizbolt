@@ -1,0 +1,38 @@
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Cache
+.cache/
+.vite/
+
+# Environment variables
+.env*
+!.env.example
+
+# Vite temporary files
+vite.config.*.timestamp-*
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+*-debug.log*
+logs/
+*.log
+
+# Editor settings
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
