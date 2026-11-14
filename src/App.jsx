@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import QuizPage from "./QuizPage";
+import Leaderboard from "./Leaderboard";
+import { buildBoard, fmt } from "./leaderboardData";
 
 function MenuBars() {
   return (
@@ -49,12 +51,6 @@ const categories = [
   { name: "History", emoji: "🏛️", color: "peach" },
   { name: "Geography", emoji: "🌍", color: "blue" },
   { name: "Arts", emoji: "🎨", color: "pink" },
-];
-
-const leaders = [
-  { rank: 1, name: "Mia Carter", points: "9,840", initials: "MC", color: "#ffc7d9" },
-  { rank: 2, name: "Noah Kim", points: "9,215", initials: "NK", color: "#bcebe0" },
-  { rank: 3, name: "Luca Ray", points: "8,970", initials: "LR", color: "#bdddf8" },
 ];
 
 const initialNotifications = [
@@ -113,6 +109,8 @@ export default function App() {
   const notifRef = useRef(null);
   const readTimer = useRef(null);
   const newCount = notifications.filter((n) => n.unread).length;
+  const weekly = buildBoard("week", points, "everyone", quizzesDone);
+  const leaders = weekly.rows.slice(0, 3);
 
   function goTo(tab) {
     setQuickStart(false);
@@ -311,6 +309,8 @@ export default function App() {
             goal={dailyGoal}
             onComplete={completeQuiz}
           />
+        ) : active === "Leaderboard" ? (
+          <Leaderboard points={points} quizzesDone={quizzesDone} onPlay={() => goTo("Quiz")} />
         ) : (
         <div className="content">
           <section className="welcome">
@@ -416,27 +416,31 @@ export default function App() {
               </div>
               <div className="leader-list">
                 {leaders.map((leader) => (
-                  <div className="leader-row" key={leader.name}>
+                  <div className="leader-row" key={leader.id}>
                     <span className={`rank rank-${leader.rank}`}>{leader.rank}</span>
-                    <span className="avatar" style={{ backgroundColor: leader.color }}>
+                    <span
+                      className={leader.isMe ? "avatar avatar-j" : "avatar"}
+                      style={leader.isMe ? undefined : { backgroundColor: leader.color }}
+                    >
                       {leader.initials}
                     </span>
                     <span className="leader-name">
-                      <strong>{leader.name}</strong>
-                      <small>{leader.points} pts</small>
+                      <strong>{leader.isMe ? "You" : leader.name}</strong>
+                      <small>{fmt(leader.score)} pts</small>
                     </span>
                     {leader.rank === 1 && <Icon name="star" size={17} filled />}
                   </div>
                 ))}
               </div>
               <div className="your-rank">
-                <span className="rank">8</span>
+                <span className="rank">{weekly.me.rank}</span>
                 <span className="avatar avatar-j">JD</span>
                 <span className="leader-name">
                   <strong>You</strong>
-                  <small>{points.toLocaleString("en-US")} pts</small>
+                  <small>{fmt(points)} pts</small>
                 </span>
-                <span className="rank-up">↑ 2</span>
+                {weekly.me.move > 0 && <span className="rank-up">↑ {weekly.me.move}</span>}
+                {weekly.me.move < 0 && <span className="rank-down">↓ {-weekly.me.move}</span>}
               </div>
               <button className="leader-button" onClick={() => goTo("Leaderboard")}>
                 Full leaderboard <Icon name="arrow" size={16} />
