@@ -85,6 +85,16 @@ function Icon({ name, size = 20, filled = false }) {
   );
 }
 
+function MenuBars() {
+  return (
+    <span className="menu-bars" aria-hidden="true">
+      <i />
+      <i />
+      <i />
+    </span>
+  );
+}
+
 const navItems = [
   { label: "Home", icon: "home" },
   { label: "Quiz", icon: "quiz" },
@@ -171,6 +181,9 @@ const initialNotifications = [
 export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem("quiz-theme") === "dark");
   const [active, setActive] = useState("Home");
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => localStorage.getItem("quiz-sidebar") !== "closed",
+  );
   const [category, setCategory] = useState("Science");
   const [notifOpen, setNotifOpen] = useState(false);
   const [showDot, setShowDot] = useState(true);
@@ -198,6 +211,10 @@ export default function App() {
   }, [dark]);
 
   useEffect(() => {
+    localStorage.setItem("quiz-sidebar", sidebarOpen ? "open" : "closed");
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     if (!notifOpen) return;
     const onPointerDown = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) closeNotifications();
@@ -214,15 +231,24 @@ export default function App() {
   }, [notifOpen]);
 
   return (
-    <div className={dark ? "app dark" : "app"}>
-      <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-mark">
-            <Icon name="bolt" size={20} filled />
-          </span>
-          <span>
-            Quizbolt<span className="brand-dot">.</span>
-          </span>
+    <div className={`app${dark ? " dark" : ""}${sidebarOpen ? "" : " sidebar-collapsed"}`}>
+      <aside className="sidebar" id="app-sidebar" inert={!sidebarOpen}>
+        <div className="sidebar-head">
+          <div className="brand">
+            <span className="brand-mark">
+              <Icon name="bolt" size={20} filled />
+            </span>
+            <span>
+              Quizbolt<span className="brand-dot">.</span>
+            </span>
+          </div>
+          <button
+            className="round-btn menu-toggle is-open sidebar-close"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu"
+          >
+            <MenuBars />
+          </button>
         </div>
         <nav className="side-nav" aria-label="Main navigation">
           <p className="nav-label">MENU</p>
@@ -266,10 +292,22 @@ export default function App() {
               Quizbolt<span className="brand-dot">.</span>
             </span>
           </div>
-          <label className="search">
-            <Icon name="search" size={20} />
-            <input aria-label="Search quizzes" placeholder="Search quizzes..." />
-          </label>
+          <div className="topbar-left">
+            <button
+              className="round-btn menu-toggle topbar-toggle"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={sidebarOpen}
+              aria-controls="app-sidebar"
+              tabIndex={sidebarOpen ? -1 : 0}
+            >
+              <MenuBars />
+            </button>
+            <label className="search">
+              <Icon name="search" size={20} />
+              <input aria-label="Search quizzes" placeholder="Search quizzes..." />
+            </label>
+          </div>
           <div className="header-actions">
             <button
               className="round-btn theme-toggle"
