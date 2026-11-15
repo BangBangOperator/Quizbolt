@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Link, Route, Routes, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import QuizPage from "./QuizPage";
@@ -146,6 +146,9 @@ export default function App() {
   const location = useLocation();
   const { pathname } = location;
   const cameFrom = location.state?.from ?? "/"; // the page that opened All categories
+  const [searchParams] = useSearchParams();
+  // the search box lives in the URL (/categories?q=sci) so it survives refresh and Back
+  const query = pathname === "/categories" ? (searchParams.get("q") ?? "") : "";
   const [sidebarOpen, setSidebarOpen] = useState(
     () => localStorage.getItem("quiz-sidebar") !== "closed",
   );
@@ -181,6 +184,16 @@ export default function App() {
   // All categories remembers which page opened it, so its Back link and the nav highlight match
   function openCategories() {
     navigate("/categories", { state: { from: pathname.startsWith("/quiz") ? "/quiz" : "/" } });
+  }
+
+  // typing in the top search box filters the categories; from any other page it opens All categories
+  function onSearch(value) {
+    const url = value ? `/categories?q=${encodeURIComponent(value)}` : "/categories";
+    if (pathname === "/categories") {
+      navigate(url, { replace: true, state: location.state });
+    } else {
+      navigate(url, { state: { from: pathname.startsWith("/quiz") ? "/quiz" : "/" } });
+    }
   }
 
   function completeQuiz({ points: earned }) {
@@ -333,7 +346,14 @@ export default function App() {
             </button>
             <label className="search">
               <Icon name="search" size={20} />
-              <input aria-label="Search quizzes" placeholder="Search quizzes..." />
+              <input
+                type="search"
+                aria-label="Search categories"
+                placeholder="Search categories..."
+                value={query}
+                onChange={(e) => onSearch(e.target.value)}
+                onKeyDown={(e) => e.key === "Escape" && query && onSearch("")}
+              />
             </label>
           </div>
           <div className="header-actions">
@@ -419,7 +439,7 @@ export default function App() {
                 <button
                   key={mode.title}
                   className={`mode-card ${mode.color}`}
-                  onClick={() => index === 0 && startQuickPlay()}
+                  onClick={() => (index === 0 ? startQuickPlay() : index === 1 && openCategories())}
                 >
                   <span className="mode-icon">
                     <Icon name={mode.icon} size={25} filled={mode.icon === "star"} />
@@ -543,6 +563,8 @@ export default function App() {
             path="/categories"
             element={
               <Categories
+                query={query}
+                onClearQuery={() => onSearch("")}
                 category={category}
                 setCategory={setCategory}
                 onStart={(name) =>

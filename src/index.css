@@ -2701,3 +2701,21 @@ main {
 .not-found-actions {
   justify-content: flex-start;
 }
+
+.no-results {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 36px 16px;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+}
+.no-results strong {
+  color: var(--text);
+  font-size: 17px;
+}
+.no-results .secondary-btn {
+  margin-top: 8px;
+}

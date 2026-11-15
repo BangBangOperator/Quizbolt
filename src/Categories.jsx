@@ -3,9 +3,11 @@ import DailyGoal from "./DailyGoal";
 import { bank } from "./questions";
 import { categories } from "./categoryData";
 
-export default function Categories({ category, setCategory, onStart, onBack, done, goal, questionTime = 20 }) {
+export default function Categories({ query = "", onClearQuery, category, setCategory, onStart, onBack, done, goal, questionTime = 20 }) {
   const selected = categories.find((c) => c.name === category) ?? categories[0];
   const count = bank[selected.name].length;
+  const term = query.trim().toLowerCase();
+  const shown = term ? categories.filter((c) => c.name.toLowerCase().includes(term)) : categories;
 
   return (
     <div className="content quiz-view">
@@ -25,13 +27,25 @@ export default function Categories({ category, setCategory, onStart, onBack, don
       <section>
         <div className="section-heading compact">
           <div>
-            <p className="eyebrow">{categories.length} TOPICS</p>
+            <p className="eyebrow">
+              {term ? `${shown.length} OF ${categories.length} TOPICS` : `${categories.length} TOPICS`}
+            </p>
             <h2>Choose a category</h2>
           </div>
         </div>
 
+        {shown.length === 0 && (
+          <div className="no-results" role="status">
+            <strong>No topics match “{query.trim()}”</strong>
+            <span>Try a different word, or browse everything.</span>
+            <button className="secondary-btn" onClick={onClearQuery}>
+              Clear search
+            </button>
+          </div>
+        )}
+
         <div className="all-grid">
-          {categories.map((item) => (
+          {shown.map((item) => (
             <button
               key={item.name}
               onClick={() => setCategory(item.name)}
