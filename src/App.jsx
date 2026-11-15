@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import QuizPage from "./QuizPage";
+import Categories from "./Categories";
+import { categories, FEATURED_COUNT } from "./categoryData";
+import { bank } from "./questions";
 import Leaderboard from "./Leaderboard";
 import Settings from "./Settings";
 import { START_POINTS, buildBoard, fmt } from "./leaderboardData";
@@ -45,13 +48,6 @@ const modes = [
     color: "blue",
     tag: "",
   },
-];
-
-const categories = [
-  { name: "Science", emoji: "🧪", color: "mint" },
-  { name: "History", emoji: "🏛️", color: "peach" },
-  { name: "Geography", emoji: "🌍", color: "blue" },
-  { name: "Arts", emoji: "🎨", color: "pink" },
 ];
 
 const initialNotifications = [
@@ -131,11 +127,13 @@ export default function App() {
     () => localStorage.getItem("quiz-sidebar") !== "closed",
   );
   const [category, setCategory] = useState("Science");
-  const [quickStart, setQuickStart] = useState(false);
+  const [autoStart, setAutoStart] = useState(null);
+  const [backTo, setBackTo] = useState("Home");
   const [quizzesDone, setQuizzesDone] = useState(3);
   const [points, setPoints] = useState(START_POINTS);
   const [name, setName] = useState(() => localStorage.getItem("quiz-name") || DEFAULT_NAME);
   const [prefs, setPrefs] = useState(loadPrefs);
+  const navActive = active === "Categories" ? backTo : active;
   const initials = initialsOf(name);
   const firstName = name.trim().split(/\s+/)[0];
   const dailyGoal = 5;
@@ -150,13 +148,24 @@ export default function App() {
   const leaders = weekly.rows.slice(0, 3);
 
   function goTo(tab) {
-    setQuickStart(false);
+    setAutoStart(null);
     setActive(tab);
   }
 
   function startQuickPlay() {
-    setQuickStart(true);
+    setAutoStart({ kind: "quick" });
     setActive("Quiz");
+  }
+
+  function startCategoryQuiz(name) {
+    setAutoStart({ kind: "category", category: name });
+    setActive("Quiz");
+  }
+
+  function openCategories() {
+    setBackTo(active === "Quiz" ? "Quiz" : "Home");
+    setAutoStart(null);
+    setActive("Categories");
   }
 
   function completeQuiz({ points: earned }) {
@@ -254,9 +263,9 @@ export default function App() {
           {navItems.map((item) => (
             <button
               key={item.label}
-              className={active === item.label ? "nav-item active" : "nav-item"}
+              className={navActive === item.label ? "nav-item active" : "nav-item"}
               onClick={() => goTo(item.label)}
-              aria-current={active === item.label ? "page" : undefined}
+              aria-current={navActive === item.label ? "page" : undefined}
             >
               <Icon name={item.icon} size={19} />
               <span>{item.label}</span>
@@ -367,11 +376,22 @@ export default function App() {
             categories={categories}
             category={category}
             setCategory={setCategory}
-            quickStart={quickStart}
+            autoStart={autoStart}
+            onSeeAll={openCategories}
             done={quizzesDone}
             goal={dailyGoal}
             questionTime={prefs.questionTime}
             onComplete={completeQuiz}
+          />
+        ) : active === "Categories" ? (
+          <Categories
+            category={category}
+            setCategory={setCategory}
+            onStart={startCategoryQuiz}
+            onBack={() => goTo(backTo)}
+            done={quizzesDone}
+            goal={dailyGoal}
+            questionTime={prefs.questionTime}
           />
         ) : active === "Leaderboard" ? (
           <Leaderboard points={points} quizzesDone={quizzesDone} initials={initials} onPlay={() => goTo("Quiz")} />
@@ -440,12 +460,12 @@ export default function App() {
                   <p className="eyebrow">EXPLORE</p>
                   <h2>Pick a category</h2>
                 </div>
-                <button className="text-button">
+                <button className="text-button" onClick={openCategories}>
                   See all <Icon name="arrow" size={16} />
                 </button>
               </div>
               <div className="category-grid">
-                {categories.map((item) => (
+                {categories.slice(0, FEATURED_COUNT).map((item) => (
                   <button
                     key={item.name}
                     onClick={() => setCategory(item.name)}
@@ -453,16 +473,7 @@ export default function App() {
                   >
                     <span>{item.emoji}</span>
                     <strong>{item.name}</strong>
-                    <small>
-                      {item.name === "Science"
-                        ? 24
-                        : item.name === "History"
-                          ? 18
-                          : item.name === "Geography"
-                            ? 15
-                            : 20}{" "}
-                      quizzes
-                    </small>
+                    <small>{bank[item.name].length} questions</small>
                   </button>
                 ))}
               </div>
@@ -533,9 +544,9 @@ export default function App() {
         {navItems.map((item) => (
           <button
             key={item.label}
-            className={active === item.label ? "active" : ""}
+            className={navActive === item.label ? "active" : ""}
             onClick={() => goTo(item.label)}
-            aria-current={active === item.label ? "page" : undefined}
+            aria-current={navActive === item.label ? "page" : undefined}
           >
             <Icon name={item.icon} size={20} />
             <span>{item.label}</span>

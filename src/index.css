@@ -2673,3 +2673,72 @@ main {
   transition-duration: 0.001ms !important;
   transition-delay: 0s !important;
 }
+
+/* ------------------------------------------------------------ All categories page */
+
+/* extra category tints (light) */
+.category-card.yellow {
+  background: #fff1bd;
+}
+.category-card.lilac {
+  background: #e7e1ff;
+}
+.category-card.teal {
+  background: #d2f0ee;
+}
+.category-card.coral {
+  background: #ffdcd6;
+}
+/* ...and their dark-theme versions (same dimming as the other category cards) */
+.dark .category-card.yellow {
+  background: #bab49f;
+}
+.dark .category-card.lilac {
+  background: #acaab6;
+}
+.dark .category-card.teal {
+  background: #a5b2b1;
+}
+.dark .category-card.coral {
+  background: #b6a7a5;
+}
+
+.back-link {
+  margin-bottom: 18px;
+}
+.back-link svg {
+  transform: rotate(180deg);
+}
+.all-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.all-grid .category-card {
+  min-height: 176px;
+}
+.cat-start {
+  position: sticky;
+  bottom: 20px;
+  margin-top: 22px;
+  z-index: 5;
+  box-shadow: 0 14px 40px #3a335224;
+}
+
+@media (max-width: 1000px) {
+  .all-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .all-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .all-grid .category-card {
+    min-height: 140px;
+  }
+  .cat-start {
+    bottom: 80px;
+  }
+}

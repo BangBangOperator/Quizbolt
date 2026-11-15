@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import { bank, createSession, QUICK_PLAY_COUNT } from "./questions";
+import { FEATURED_COUNT } from "./categoryData";
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -12,10 +13,11 @@ const makeRules = (time) => [
   { icon: "star", title: "Finish to hit your goal", text: "Counts toward your daily goal." },
 ];
 
-export default function QuizPage({ categories, category, setCategory, quickStart, done, goal, questionTime = 20, onComplete }) {
+// autoStart: a quiz config ({ kind: "quick" } or { kind: "category", category }) to begin right away
+export default function QuizPage({ categories, category, setCategory, autoStart, onSeeAll, done, goal, questionTime = 20, onComplete }) {
   const [phase, setPhase] = useState(() =>
-    quickStart
-      ? { view: "play", config: { kind: "quick" }, session: createSession({ kind: "quick" }) }
+    autoStart
+      ? { view: "play", config: autoStart, session: createSession(autoStart) }
       : { view: "lobby" },
   );
 
@@ -69,13 +71,14 @@ export default function QuizPage({ categories, category, setCategory, quickStart
       done={done}
       goal={goal}
       onStart={start}
+      onSeeAll={onSeeAll}
     />
   );
 }
 
 /* ---------------------------------------------------------------- Lobby */
 
-function Lobby({ categories, category, setCategory, done, goal, questionTime, onStart }) {
+function Lobby({ categories, category, setCategory, done, goal, questionTime, onStart, onSeeAll }) {
   const selected = categories.find((c) => c.name === category) ?? categories[0];
   const count = bank[selected.name].length;
 
@@ -121,9 +124,12 @@ function Lobby({ categories, category, setCategory, done, goal, questionTime, on
               <p className="eyebrow">EXPLORE</p>
               <h2>Choose a topic</h2>
             </div>
+            <button className="text-button" onClick={onSeeAll}>
+              See all <Icon name="arrow" size={16} />
+            </button>
           </div>
           <div className="category-grid">
-            {categories.map((item) => (
+            {categories.slice(0, FEATURED_COUNT).map((item) => (
               <button
                 key={item.name}
                 onClick={() => setCategory(item.name)}
