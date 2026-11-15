@@ -144,8 +144,8 @@ function Lobby({ categories, category, setCategory, done, goal, questionTime, on
           </div>
 
           <div className="start-card">
-            <div className="continue-icon">{selected.emoji}</div>
-            <div className="continue-info">
+            <div className="start-icon">{selected.emoji}</div>
+            <div className="start-info">
               <strong>{selected.name} quiz</strong>
               <span className="start-meta">
                 {count} questions · about {Math.round((count * questionTime) / 60)} min

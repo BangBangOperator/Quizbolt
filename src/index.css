@@ -851,65 +851,6 @@ main {
   border-color: #a99cff;
   box-shadow: 0 0 0 3px #7667e8aa;
 }
-.continue-card {
-  margin-top: 16px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-  border-radius: 17px;
-  padding: 14px 15px;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-}
-.continue-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  font-size: 25px;
-  background: #eeeaff;
-}
-.continue-info {
-  flex: 1;
-  min-width: 0;
-}
-.continue-info > strong {
-  display: block;
-  font-size: 15px;
-  margin: 3px 0 7px;
-}
-.progress {
-  height: 5px;
-  background: var(--soft-purple);
-  border-radius: 5px;
-  overflow: hidden;
-  width: 75%;
-  display: inline-block;
-  vertical-align: middle;
-}
-.progress i {
-  display: block;
-  width: 60%;
-  height: 100%;
-  background: var(--purple);
-  border-radius: inherit;
-}
-.continue-info > small {
-  font-size: 12px;
-  color: var(--muted);
-  margin-left: 8px;
-}
-.continue-card > button {
-  width: 35px;
-  height: 35px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 10px;
-  color: white;
-  background: var(--purple);
-}
 
 .leaderboard-card {
   background: var(--panel);
@@ -1184,12 +1125,6 @@ main {
   .category-card {
     padding: 13px;
   }
-  .continue-card {
-    margin-top: 14px;
-  }
-  .progress {
-    width: 55%;
-  }
   .bottom-nav {
     position: fixed;
     display: flex;
@@ -1231,9 +1166,6 @@ main {
   }
   .mode-copy small {
     font-size: 11px;
-  }
-  .continue-info > small {
-    display: none;
   }
 }
 
@@ -1322,7 +1254,21 @@ main {
   align-items: center;
   gap: 13px;
 }
-.start-card .continue-info > strong {
+.start-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+  background: #eeeaff;
+}
+.start-info {
+  flex: 1;
+  min-width: 0;
+}
+.start-info > strong {
+  display: block;
   margin: 0 0 4px;
   font-size: 16px;
 }
@@ -1746,7 +1692,7 @@ main {
   .start-card {
     flex-wrap: wrap;
   }
-  .start-card .continue-info {
+  .start-card .start-info {
     flex: 1 1 0;
   }
   .start-card .primary-btn {

@@ -46,8 +46,8 @@ export default function Categories({ category, setCategory, onStart, onBack, don
         </div>
 
         <div className="start-card cat-start">
-          <div className="continue-icon">{selected.emoji}</div>
-          <div className="continue-info">
+          <div className="start-icon">{selected.emoji}</div>
+          <div className="start-info">
             <strong>{selected.name} quiz</strong>
             <span className="start-meta">
               {count} questions · about {Math.max(1, Math.round((count * questionTime) / 60))} min

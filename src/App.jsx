@@ -72,16 +72,6 @@ const initialNotifications = [
     unread: true,
   },
   {
-    id: 3,
-    emoji: "🪐",
-    type: "notifProgress",
-    color: "blue",
-    title: "Continue Wonders of Space",
-    text: "4 questions left to finish your quiz.",
-    time: "3 hours ago",
-    unread: true,
-  },
-  {
     id: 4,
     emoji: "👋",
     type: "notifInvites",
@@ -98,7 +88,6 @@ const DEFAULT_PREFS = {
   reduceMotion: false,
   notifRank: true,
   notifStreak: true,
-  notifProgress: true,
   notifInvites: true,
 };
 const DEFAULT_NAME = "Jamie Doe";
@@ -106,7 +95,11 @@ const DEFAULT_NAME = "Jamie Doe";
 function loadPrefs() {
   try {
     const saved = JSON.parse(localStorage.getItem("quiz-prefs"));
-    const merged = { ...DEFAULT_PREFS, ...saved };
+    // keep only known settings, so keys from older versions don't linger in storage
+    const merged = { ...DEFAULT_PREFS };
+    for (const key of Object.keys(DEFAULT_PREFS)) {
+      if (saved && key in saved) merged[key] = saved[key];
+    }
     if (![15, 20, 30].includes(merged.questionTime)) merged.questionTime = DEFAULT_PREFS.questionTime;
     return merged;
   } catch {
@@ -476,20 +469,6 @@ export default function App() {
                     <small>{bank[item.name].length} questions</small>
                   </button>
                 ))}
-              </div>
-              <div className="continue-card">
-                <div className="continue-icon">🪐</div>
-                <div className="continue-info">
-                  <span className="eyebrow">CONTINUE QUIZ</span>
-                  <strong>Wonders of Space</strong>
-                  <div className="progress">
-                    <i />
-                  </div>
-                  <small>6 of 10 questions</small>
-                </div>
-                <button aria-label="Continue Wonders of Space">
-                  <Icon name="arrow" size={20} />
-                </button>
               </div>
             </section>
 

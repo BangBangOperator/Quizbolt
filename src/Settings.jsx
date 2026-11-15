@@ -226,9 +226,6 @@ export default function Settings({
             <Row icon="bolt" tint="peach" title="Streak reminders" text="A nudge to keep your streak alive.">
               <Switch checked={prefs.notifStreak} onChange={(v) => setPref("notifStreak", v)} label="Streak reminders" />
             </Row>
-            <Row icon="quiz" tint="blue" title="Unfinished quizzes" text="Pick up where you left off.">
-              <Switch checked={prefs.notifProgress} onChange={(v) => setPref("notifProgress", v)} label="Unfinished quiz reminders" />
-            </Row>
             <Row icon="users" tint="pink" title="Friend invites" text="When someone invites you to a room.">
               <Switch checked={prefs.notifInvites} onChange={(v) => setPref("notifInvites", v)} label="Friend invite notifications" />
             </Row>
