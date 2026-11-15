@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import QuizPage from "./QuizPage";
 import Categories from "./Categories";
-import { categories, FEATURED_COUNT } from "./categoryData";
+import { categories, FEATURED_COUNT, quizPath } from "./categoryData";
+import NotFound from "./NotFound";
 import { bank } from "./questions";
 import Leaderboard from "./Leaderboard";
 import Settings from "./Settings";
@@ -20,11 +22,36 @@ function MenuBars() {
 }
 
 const navItems = [
-  { label: "Home", icon: "home" },
-  { label: "Quiz", icon: "quiz" },
-  { label: "Leaderboard", icon: "trophy" },
-  { label: "Settings", icon: "settings" },
+  { label: "Home", icon: "home", path: "/" },
+  { label: "Quiz", icon: "quiz", path: "/quiz" },
+  { label: "Leaderboard", icon: "trophy", path: "/leaderboard" },
+  { label: "Settings", icon: "settings", path: "/settings" },
 ];
+
+// which sidebar item is highlighted for the current URL
+function navFor(pathname, from) {
+  if (pathname === "/") return "Home";
+  if (pathname.startsWith("/quiz")) return "Quiz";
+  if (pathname.startsWith("/leaderboard")) return "Leaderboard";
+  if (pathname.startsWith("/settings")) return "Settings";
+  if (pathname.startsWith("/categories")) return from === "/quiz" ? "Quiz" : "Home"; // highlight where you came from
+  return null;
+}
+
+function titleFor(pathname) {
+  const page = (name) => `${name} · Quizbolt`;
+  if (pathname === "/") return page("Home");
+  if (pathname === "/quiz") return page("Quiz");
+  if (pathname === "/quiz/quick") return page("Quick Play");
+  if (pathname.startsWith("/quiz/")) {
+    const name = pathname.split("/")[2];
+    return page(`${name.charAt(0).toUpperCase()}${name.slice(1)} quiz`);
+  }
+  if (pathname.startsWith("/categories")) return page("All categories");
+  if (pathname.startsWith("/leaderboard")) return page("Leaderboard");
+  if (pathname.startsWith("/settings")) return page("Settings");
+  return page("Page not found");
+}
 
 const modes = [
   {
@@ -115,19 +142,19 @@ function initialsOf(name) {
 
 export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem("quiz-theme") === "dark");
-  const [active, setActive] = useState("Home");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { pathname } = location;
+  const cameFrom = location.state?.from ?? "/"; // the page that opened All categories
   const [sidebarOpen, setSidebarOpen] = useState(
     () => localStorage.getItem("quiz-sidebar") !== "closed",
   );
   const [category, setCategory] = useState("Science");
-  const [autoStart, setAutoStart] = useState(null);
-  const [quizOrigin, setQuizOrigin] = useState(null); // where the running quiz was started from
-  const [backTo, setBackTo] = useState("Home");
   const [quizzesDone, setQuizzesDone] = useState(3);
   const [points, setPoints] = useState(START_POINTS);
   const [name, setName] = useState(() => localStorage.getItem("quiz-name") || DEFAULT_NAME);
   const [prefs, setPrefs] = useState(loadPrefs);
-  const navActive = active === "Categories" ? backTo : active;
+  const navActive = navFor(pathname, cameFrom);
   const initials = initialsOf(name);
   const firstName = name.trim().split(/\s+/)[0];
   const dailyGoal = 5;
@@ -143,37 +170,17 @@ export default function App() {
   const selectedCategory = categories.find((c) => c.name === category) ?? categories[0];
   const selectedCount = bank[selectedCategory.name].length;
 
-  function goTo(tab) {
-    setAutoStart(null);
-    setQuizOrigin(null);
-    setActive(tab);
-  }
-
   function startQuickPlay() {
-    setAutoStart({ kind: "quick" });
-    setQuizOrigin(null);
-    setActive("Quiz");
+    navigate(quizPath({ kind: "quick" }));
   }
 
-  // `from` is the page to return to when the quiz ends or is quit (e.g. "Categories")
-  function startCategoryQuiz(name, from = null) {
-    setAutoStart({ kind: "category", category: name });
-    setQuizOrigin(from);
-    setActive("Quiz");
+  function startCategoryQuiz(name) {
+    navigate(quizPath({ kind: "category", category: name }));
   }
 
+  // All categories remembers which page opened it, so its Back link and the nav highlight match
   function openCategories() {
-    setBackTo(active === "Quiz" ? "Quiz" : "Home");
-    setAutoStart(null);
-    setQuizOrigin(null);
-    setActive("Categories");
-  }
-
-  // back to the All categories page without touching its own "Back" destination
-  function returnToCategories() {
-    setAutoStart(null);
-    setQuizOrigin(null);
-    setActive("Categories");
+    navigate("/categories", { state: { from: pathname.startsWith("/quiz") ? "/quiz" : "/" } });
   }
 
   function completeQuiz({ points: earned }) {
@@ -216,7 +223,11 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
-  }, [active]);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.title = titleFor(pathname);
+  }, [pathname]);
 
   useEffect(() => {
     localStorage.setItem("quiz-prefs", JSON.stringify(prefs));
@@ -269,15 +280,15 @@ export default function App() {
         <nav className="side-nav" aria-label="Main navigation">
           <p className="nav-label">MENU</p>
           {navItems.map((item) => (
-            <button
+            <Link
               key={item.label}
+              to={item.path}
               className={navActive === item.label ? "nav-item active" : "nav-item"}
-              onClick={() => goTo(item.label)}
               aria-current={navActive === item.label ? "page" : undefined}
             >
               <Icon name={item.icon} size={19} />
               <span>{item.label}</span>
-            </button>
+            </Link>
           ))}
         </nav>
         <div className="streak-card">
@@ -288,7 +299,7 @@ export default function App() {
           </div>
         </div>
         <div className="sidebar-footer">
-          <button className="profile-mini" onClick={() => goTo("Settings")} aria-label="Open profile settings">
+          <button className="profile-mini" onClick={() => navigate("/settings")} aria-label="Open profile settings">
             <span className="avatar avatar-j">{initials}</span>
             <span>
               <strong>{name}</strong>
@@ -379,47 +390,10 @@ export default function App() {
           </div>
         </header>
 
-        {active === "Quiz" ? (
-          <QuizPage
-            categories={categories}
-            category={category}
-            setCategory={setCategory}
-            autoStart={autoStart}
-            onSeeAll={openCategories}
-            onLeave={quizOrigin === "Categories" ? returnToCategories : undefined}
-            leaveLabel="Back to categories"
-            done={quizzesDone}
-            goal={dailyGoal}
-            questionTime={prefs.questionTime}
-            onComplete={completeQuiz}
-          />
-        ) : active === "Categories" ? (
-          <Categories
-            category={category}
-            setCategory={setCategory}
-            onStart={(name) => startCategoryQuiz(name, "Categories")}
-            onBack={() => goTo(backTo)}
-            done={quizzesDone}
-            goal={dailyGoal}
-            questionTime={prefs.questionTime}
-          />
-        ) : active === "Leaderboard" ? (
-          <Leaderboard points={points} quizzesDone={quizzesDone} initials={initials} onPlay={() => goTo("Quiz")} />
-        ) : active === "Settings" ? (
-          <Settings
-            name={name}
-            initials={initials}
-            onSaveName={setName}
-            dark={dark}
-            setDark={setDark}
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            prefs={prefs}
-            setPref={setPref}
-            onResetPrefs={resetPrefs}
-            onResetProgress={resetProgress}
-          />
-        ) : (
+        <Routes>
+          <Route
+            path="/"
+            element={
         <div className="content">
           <section className="welcome">
             <div>
@@ -542,26 +516,84 @@ export default function App() {
                 {weekly.me.move > 0 && <span className="rank-up">↑ {weekly.me.move}</span>}
                 {weekly.me.move < 0 && <span className="rank-down">↓ {-weekly.me.move}</span>}
               </div>
-              <button className="leader-button" onClick={() => goTo("Leaderboard")}>
+              <button className="leader-button" onClick={() => navigate("/leaderboard")}>
                 Full leaderboard <Icon name="arrow" size={16} />
               </button>
             </aside>
           </div>
         </div>
-        )}
+            }
+          />
+          <Route
+            path="/quiz/:slug?"
+            element={
+              <QuizPage
+                categories={categories}
+                category={category}
+                setCategory={setCategory}
+                onSeeAll={openCategories}
+                done={quizzesDone}
+                goal={dailyGoal}
+                questionTime={prefs.questionTime}
+                onComplete={completeQuiz}
+              />
+            }
+          />
+          <Route
+            path="/categories"
+            element={
+              <Categories
+                category={category}
+                setCategory={setCategory}
+                onStart={(name) =>
+                  navigate(quizPath({ kind: "category", category: name }), { state: { origin: { from: cameFrom } } })
+                }
+                onBack={() => navigate(cameFrom)}
+                done={quizzesDone}
+                goal={dailyGoal}
+                questionTime={prefs.questionTime}
+              />
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <Leaderboard points={points} quizzesDone={quizzesDone} initials={initials} onPlay={() => navigate("/quiz")} />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <Settings
+                name={name}
+                initials={initials}
+                onSaveName={setName}
+                dark={dark}
+                setDark={setDark}
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                prefs={prefs}
+                setPref={setPref}
+                onResetPrefs={resetPrefs}
+                onResetProgress={resetProgress}
+              />
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </main>
 
       <nav className="bottom-nav" aria-label="Mobile navigation">
         {navItems.map((item) => (
-          <button
+          <Link
             key={item.label}
+            to={item.path}
             className={navActive === item.label ? "active" : ""}
-            onClick={() => goTo(item.label)}
             aria-current={navActive === item.label ? "page" : undefined}
           >
             <Icon name={item.icon} size={20} />
             <span>{item.label}</span>
-          </button>
+          </Link>
         ))}
       </nav>
     </div>

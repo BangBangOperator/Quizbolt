@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { Icon } from "./Icon";
 import DailyGoal from "./DailyGoal";
 import { bank, createSession, QUICK_PLAY_COUNT } from "./questions";
-import { FEATURED_COUNT } from "./categoryData";
+import { FEATURED_COUNT, categoryFromSlug, quizPath } from "./categoryData";
 
 const LETTERS = ["A", "B", "C", "D"];
 
@@ -13,22 +14,29 @@ const makeRules = (time) => [
   { icon: "star", title: "Finish to hit your goal", text: "Counts toward your daily goal." },
 ];
 
-// autoStart: a quiz config ({ kind: "quick" } or { kind: "category", category }) to begin right away
-// onLeave: optional. When the quiz was started from another page (e.g. All categories), Quit and
-// "Back" return there instead of to this page's own lobby. leaveLabel is the button text for it.
-export default function QuizPage({
-  categories,
-  category,
-  setCategory,
-  autoStart,
-  onSeeAll,
-  onLeave,
-  leaveLabel = "Back to quizzes",
-  done,
-  goal,
-  questionTime = 20,
-  onComplete,
-}) {
+// The URL decides what runs:
+//   /quiz           -> the lobby
+//   /quiz/quick     -> a Quick Play round
+//   /quiz/science   -> a Science quiz   (any category slug)
+export default function QuizPage(props) {
+  const { slug } = useParams();
+  let autoStart = null;
+  if (slug === "quick") autoStart = { kind: "quick" };
+  else if (slug) {
+    const match = categoryFromSlug(slug);
+    if (!match) return <Navigate to="/quiz" replace />; // unknown quiz -> back to the lobby
+    autoStart = { kind: "category", category: match.name };
+  }
+  // keyed by the URL: every new quiz URL starts from a clean slate
+  return <QuizFlow key={slug ?? "lobby"} autoStart={autoStart} {...props} />;
+}
+
+function QuizFlow({ categories, category, setCategory, autoStart, onSeeAll, done, goal, questionTime = 20, onComplete }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  // set when the quiz was opened from All categories: Quit / Back return there
+  const origin = location.state?.origin ?? null;
+
   const [phase, setPhase] = useState(() =>
     autoStart
       ? { view: "play", config: autoStart, session: createSession(autoStart) }
@@ -39,10 +47,21 @@ export default function QuizPage({
     window.scrollTo({ top: 0 });
   }, [phase.view]);
 
-  const leave = onLeave ?? (() => setPhase({ view: "lobby" }));
-
+  // starting a quiz moves to its own URL
   function start(config) {
+    navigate(quizPath(config));
+  }
+
+  // playing the same quiz again keeps the URL, only the questions are reshuffled
+  function replay(config) {
     setPhase({ view: "play", config, session: createSession(config) });
+  }
+
+  // leaving a finished or abandoned quiz replaces its URL, so the browser's Back button
+  // never lands on a quiz that is already over
+  function leave() {
+    if (origin) navigate("/categories", { replace: true, state: { from: origin.from } });
+    else navigate("/quiz", { replace: true });
   }
 
   function finish(log) {
@@ -72,9 +91,9 @@ export default function QuizPage({
         result={phase}
         done={done}
         goal={goal}
-        onReplay={() => start(phase.config)}
+        onReplay={() => replay(phase.config)}
         onExit={leave}
-        exitLabel={onLeave ? leaveLabel : "Back to quizzes"}
+        exitLabel={origin ? "Back to categories" : "Back to quizzes"}
       />
     );
   }

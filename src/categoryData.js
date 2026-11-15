@@ -16,3 +16,11 @@ export const categories = [
 ];
 
 export const FEATURED_COUNT = 4;
+
+// URL helpers: "Science" <-> /quiz/science
+export const slugOf = (name) => name.toLowerCase().replace(/\s+/g, "-");
+export const categoryFromSlug = (slug) => categories.find((c) => slugOf(c.name) === slug);
+
+// The URL of a quiz: { kind: "quick" } -> /quiz/quick, { kind: "category", category } -> /quiz/science
+export const quizPath = (config) =>
+  config.kind === "quick" ? "/quiz/quick" : `/quiz/${slugOf(config.category)}`;

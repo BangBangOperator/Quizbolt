@@ -154,6 +154,8 @@
   margin-bottom: 10px;
 }
 .nav-item {
+  box-sizing: border-box; /* now a link: keep the same sizing a button had */
+  text-decoration: none;
   width: 100%;
   border: 0;
   background: transparent;
@@ -1141,7 +1143,9 @@ main {
     justify-content: space-around;
     padding: 7px 5px 6px;
   }
-  .bottom-nav button {
+  .bottom-nav a {
+    box-sizing: border-box;
+    text-decoration: none;
     width: 24%;
     border: 0;
     background: transparent;
@@ -1155,7 +1159,7 @@ main {
     font-weight: 800;
     border-radius: 10px;
   }
-  .bottom-nav button.active {
+  .bottom-nav a.active {
     color: var(--purple);
     background: var(--soft-purple);
   }
@@ -1196,6 +1200,7 @@ main {
 
 .primary-btn,
 .secondary-btn {
+  text-decoration: none; /* they can also be links (404 page) */
   height: 46px;
   padding: 0 22px;
   border-radius: 14px;
@@ -2691,4 +2696,8 @@ main {
   .cat-start {
     bottom: 80px;
   }
+}
+
+.not-found-actions {
+  justify-content: flex-start;
 }
