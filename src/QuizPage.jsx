@@ -14,7 +14,21 @@ const makeRules = (time) => [
 ];
 
 // autoStart: a quiz config ({ kind: "quick" } or { kind: "category", category }) to begin right away
-export default function QuizPage({ categories, category, setCategory, autoStart, onSeeAll, done, goal, questionTime = 20, onComplete }) {
+// onLeave: optional. When the quiz was started from another page (e.g. All categories), Quit and
+// "Back" return there instead of to this page's own lobby. leaveLabel is the button text for it.
+export default function QuizPage({
+  categories,
+  category,
+  setCategory,
+  autoStart,
+  onSeeAll,
+  onLeave,
+  leaveLabel = "Back to quizzes",
+  done,
+  goal,
+  questionTime = 20,
+  onComplete,
+}) {
   const [phase, setPhase] = useState(() =>
     autoStart
       ? { view: "play", config: autoStart, session: createSession(autoStart) }
@@ -24,6 +38,8 @@ export default function QuizPage({ categories, category, setCategory, autoStart,
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [phase.view]);
+
+  const leave = onLeave ?? (() => setPhase({ view: "lobby" }));
 
   function start(config) {
     setPhase({ view: "play", config, session: createSession(config) });
@@ -45,7 +61,7 @@ export default function QuizPage({ categories, category, setCategory, autoStart,
         categories={categories}
         questionTime={questionTime}
         onFinish={finish}
-        onQuit={() => setPhase({ view: "lobby" })}
+        onQuit={leave}
       />
     );
   }
@@ -57,7 +73,8 @@ export default function QuizPage({ categories, category, setCategory, autoStart,
         done={done}
         goal={goal}
         onReplay={() => start(phase.config)}
-        onExit={() => setPhase({ view: "lobby" })}
+        onExit={leave}
+        exitLabel={onLeave ? leaveLabel : "Back to quizzes"}
       />
     );
   }
@@ -370,7 +387,7 @@ function Play({ session, categories, questionTime, onFinish, onQuit }) {
 
 /* -------------------------------------------------------------- Results */
 
-function Results({ result, done, goal, onReplay, onExit }) {
+function Results({ result, done, goal, onReplay, onExit, exitLabel }) {
   const { session, log, correct, points, avgTime } = result;
   const total = session.questions.length;
   const pct = Math.round((correct / total) * 100);
@@ -419,7 +436,7 @@ function Results({ result, done, goal, onReplay, onExit }) {
               Play again
             </button>
             <button className="secondary-btn" onClick={onExit}>
-              Back to quizzes
+              {exitLabel}
             </button>
           </div>
         </div>

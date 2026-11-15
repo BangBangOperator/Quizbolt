@@ -121,6 +121,7 @@ export default function App() {
   );
   const [category, setCategory] = useState("Science");
   const [autoStart, setAutoStart] = useState(null);
+  const [quizOrigin, setQuizOrigin] = useState(null); // where the running quiz was started from
   const [backTo, setBackTo] = useState("Home");
   const [quizzesDone, setQuizzesDone] = useState(3);
   const [points, setPoints] = useState(START_POINTS);
@@ -144,22 +145,34 @@ export default function App() {
 
   function goTo(tab) {
     setAutoStart(null);
+    setQuizOrigin(null);
     setActive(tab);
   }
 
   function startQuickPlay() {
     setAutoStart({ kind: "quick" });
+    setQuizOrigin(null);
     setActive("Quiz");
   }
 
-  function startCategoryQuiz(name) {
+  // `from` is the page to return to when the quiz ends or is quit (e.g. "Categories")
+  function startCategoryQuiz(name, from = null) {
     setAutoStart({ kind: "category", category: name });
+    setQuizOrigin(from);
     setActive("Quiz");
   }
 
   function openCategories() {
     setBackTo(active === "Quiz" ? "Quiz" : "Home");
     setAutoStart(null);
+    setQuizOrigin(null);
+    setActive("Categories");
+  }
+
+  // back to the All categories page without touching its own "Back" destination
+  function returnToCategories() {
+    setAutoStart(null);
+    setQuizOrigin(null);
     setActive("Categories");
   }
 
@@ -373,6 +386,8 @@ export default function App() {
             setCategory={setCategory}
             autoStart={autoStart}
             onSeeAll={openCategories}
+            onLeave={quizOrigin === "Categories" ? returnToCategories : undefined}
+            leaveLabel="Back to categories"
             done={quizzesDone}
             goal={dailyGoal}
             questionTime={prefs.questionTime}
@@ -382,7 +397,7 @@ export default function App() {
           <Categories
             category={category}
             setCategory={setCategory}
-            onStart={startCategoryQuiz}
+            onStart={(name) => startCategoryQuiz(name, "Categories")}
             onBack={() => goTo(backTo)}
             done={quizzesDone}
             goal={dailyGoal}
