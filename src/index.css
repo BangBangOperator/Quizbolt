@@ -827,9 +827,29 @@ main {
 .category-card.pink {
   background: #f6e2f5;
 }
+/* Dark theme: dim the pastel backgrounds directly. A `filter` on the whole card also dimmed
+   the purple "selected" border until it vanished, so only the emoji gets the filter now. */
 .dark .category-card {
+  color: #1e1c21;
+}
+.dark .category-card.mint {
+  background: #aab5b0;
+}
+.dark .category-card.peach {
+  background: #b8afa7;
+}
+.dark .category-card.blue {
+  background: #acb2b9;
+}
+.dark .category-card.pink {
+  background: #b4abb3;
+}
+.dark .category-card > span {
   filter: saturate(0.55) brightness(0.75);
-  color: #292530;
+}
+.dark .category-card.selected {
+  border-color: #a99cff;
+  box-shadow: 0 0 0 3px #7667e8aa;
 }
 .continue-card {
   margin-top: 16px;
