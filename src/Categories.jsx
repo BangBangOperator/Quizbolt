@@ -4,10 +4,11 @@ import { bank } from "./questions";
 import { categories } from "./categoryData";
 
 export default function Categories({ query = "", onClearQuery, category, setCategory, onStart, onBack, done, goal, questionTime = 20 }) {
-  const selected = categories.find((c) => c.name === category) ?? categories[0];
-  const count = bank[selected.name].length;
   const term = query.trim().toLowerCase();
   const shown = term ? categories.filter((c) => c.name.toLowerCase().includes(term)) : categories;
+  // the start bar only appears for a category that was clicked and is still visible in the results
+  const selected = shown.find((c) => c.name === category) ?? null;
+  const count = selected ? bank[selected.name].length : 0;
 
   return (
     <div className="content quiz-view">
@@ -59,6 +60,7 @@ export default function Categories({ query = "", onClearQuery, category, setCate
           ))}
         </div>
 
+        {selected && (
         <div className="start-card cat-start">
           <div className="start-icon">{selected.emoji}</div>
           <div className="start-info">
@@ -71,6 +73,7 @@ export default function Categories({ query = "", onClearQuery, category, setCate
             Start quiz <Icon name="arrow" size={18} />
           </button>
         </div>
+        )}
       </section>
     </div>
   );

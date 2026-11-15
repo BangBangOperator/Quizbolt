@@ -152,7 +152,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(
     () => localStorage.getItem("quiz-sidebar") !== "closed",
   );
-  const [category, setCategory] = useState("Science");
+  const [category, setCategory] = useState(null);
   const [quizzesDone, setQuizzesDone] = useState(3);
   const [points, setPoints] = useState(START_POINTS);
   const [name, setName] = useState(() => localStorage.getItem("quiz-name") || DEFAULT_NAME);
@@ -170,8 +170,9 @@ export default function App() {
   const newCount = visibleNotifications.filter((n) => n.unread).length;
   const weekly = buildBoard("week", points, "everyone", quizzesDone, initials);
   const leaders = weekly.rows.slice(0, 3);
-  const selectedCategory = categories.find((c) => c.name === category) ?? categories[0];
-  const selectedCount = bank[selectedCategory.name].length;
+  // null until the person clicks a category, so no start bar is shown by default
+  const selectedCategory = categories.find((c) => c.name === category) ?? null;
+  const selectedCount = selectedCategory ? bank[selectedCategory.name].length : 0;
 
   function startQuickPlay() {
     navigate(quizPath({ kind: "quick" }));
@@ -483,6 +484,7 @@ export default function App() {
                 ))}
               </div>
 
+              {selectedCategory && (
               <div className="start-card">
                 <div className="start-icon">{selectedCategory.emoji}</div>
                 <div className="start-info">
@@ -496,6 +498,7 @@ export default function App() {
                   Start quiz <Icon name="arrow" size={18} />
                 </button>
               </div>
+              )}
             </section>
 
             <aside className="leaderboard-card">

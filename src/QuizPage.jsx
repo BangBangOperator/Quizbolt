@@ -115,8 +115,8 @@ function QuizFlow({ categories, category, setCategory, autoStart, onSeeAll, done
 /* ---------------------------------------------------------------- Lobby */
 
 function Lobby({ categories, category, setCategory, done, goal, questionTime, onStart, onSeeAll }) {
-  const selected = categories.find((c) => c.name === category) ?? categories[0];
-  const count = bank[selected.name].length;
+  const selected = categories.find((c) => c.name === category) ?? null; // null = nothing picked yet
+  const count = selected ? bank[selected.name].length : 0;
 
   return (
     <div className="content quiz-view">
@@ -179,6 +179,7 @@ function Lobby({ categories, category, setCategory, done, goal, questionTime, on
             ))}
           </div>
 
+          {selected && (
           <div className="start-card">
             <div className="start-icon">{selected.emoji}</div>
             <div className="start-info">
@@ -191,6 +192,7 @@ function Lobby({ categories, category, setCategory, done, goal, questionTime, on
               Start quiz <Icon name="arrow" size={18} />
             </button>
           </div>
+          )}
         </section>
 
         <aside className="leaderboard-card">
