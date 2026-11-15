@@ -796,6 +796,11 @@ main {
     transform 0.2s,
     border-color 0.2s;
 }
+/* Featured cards keep a fixed, near-square proportion (about 9:8), so they never stretch to
+   match the height of whatever sits next to them. */
+.category-grid .category-card {
+  aspect-ratio: 9 / 8;
+}
 .category-card:hover {
   transform: translateY(-2px);
 }
@@ -984,9 +989,6 @@ main {
   .topic-section {
     display: flex;
     flex-direction: column;
-  }
-  .category-grid {
-    flex: 1;
   }
   .leaderboard-card {
     display: flex;
