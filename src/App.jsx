@@ -139,6 +139,8 @@ export default function App() {
   const newCount = visibleNotifications.filter((n) => n.unread).length;
   const weekly = buildBoard("week", points, "everyone", quizzesDone, initials);
   const leaders = weekly.rows.slice(0, 3);
+  const selectedCategory = categories.find((c) => c.name === category) ?? categories[0];
+  const selectedCount = bank[selectedCategory.name].length;
 
   function goTo(tab) {
     setAutoStart(null);
@@ -462,6 +464,7 @@ export default function App() {
                   <button
                     key={item.name}
                     onClick={() => setCategory(item.name)}
+                    aria-pressed={category === item.name}
                     className={`category-card ${item.color} ${category === item.name ? "selected" : ""}`}
                   >
                     <span>{item.emoji}</span>
@@ -469,6 +472,20 @@ export default function App() {
                     <small>{bank[item.name].length} questions</small>
                   </button>
                 ))}
+              </div>
+
+              <div className="start-card">
+                <div className="start-icon">{selectedCategory.emoji}</div>
+                <div className="start-info">
+                  <strong>{selectedCategory.name} quiz</strong>
+                  <span className="start-meta">
+                    {selectedCount} questions · about{" "}
+                    {Math.max(1, Math.round((selectedCount * prefs.questionTime) / 60))} min
+                  </span>
+                </div>
+                <button className="primary-btn" onClick={() => startCategoryQuiz(selectedCategory.name)}>
+                  Start quiz <Icon name="arrow" size={18} />
+                </button>
               </div>
             </section>
 

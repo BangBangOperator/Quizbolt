@@ -985,6 +985,8 @@ main {
     flex: 1;
     align-items: stretch;
     max-height: 440px;
+    /* the cap above must never squash the content (wide screens make the cards bigger) */
+    min-height: min-content;
   }
   .topic-section {
     display: flex;
